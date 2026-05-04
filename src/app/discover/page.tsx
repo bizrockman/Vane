@@ -58,8 +58,9 @@ const Page = () => {
         throw new Error(data.message);
       }
 
-      data.blogs = data.blogs.filter((blog: Discover) => blog.thumbnail);
-
+      // Upstream filtered out items without a thumbnail; in this fork search
+      // is served by orio-search which doesn't ship per-result thumbnails, so
+      // the cards now handle missing images themselves and we keep all blogs.
       setDiscover(data.blogs);
     } catch (err: any) {
       console.error('Error fetching data:', err.message);
