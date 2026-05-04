@@ -1,11 +1,11 @@
 # Vane (bizrockman fork)
 
-A fork of [ItzCrazyKns/Vane](https://github.com/ItzCrazyKns/Vane) used as a UI playground for testing what
-later belongs into autonomous AI agents. Same answer-engine surface, different
-plumbing — search and content extraction are pushed out of the Vane container
-and into a self-hosted [orio-search](https://github.com/bizrockman/llm-websearch)
-instance, so this fork's results pile up in a personal Meilisearch index that
-grows with use.
+A fork of [ItzCrazyKns/Vane](https://github.com/ItzCrazyKns/Vane) used as a UI
+playground for testing what later belongs into autonomous AI agents. Same
+answer-engine surface, different plumbing — search and content extraction are
+pushed out of the Vane container and into a self-hosted
+[orio-search](https://github.com/bizrockman/llm-websearch) instance, so every
+page the UI reads accumulates in a Meilisearch index that grows with use.
 
 This is **not** a drop-in replacement for upstream Vane. If you just want a
 self-hosted answer engine with a bundled search stack, use upstream — it's
@@ -19,9 +19,10 @@ you want to:
 
 - Reuse the same search/extraction layer from multiple consumers (Vane today,
   agents tomorrow, custom CLI tools later).
-- Build a personal index of pages you've actually engaged with — the
+- Build a knowledge corpus from pages the UI has actually engaged with — the
   "LLM wiki" idea: every URL the system reads is cached and indexed, repeat
-  visits hit a local cache, the corpus reflects your real interests over time.
+  visits hit a local cache, the corpus reflects what's actually been used
+  over time.
 - See and tune the request flow end-to-end (Bearer-auth, response headers
   exposing which path served the answer, configurable freshness, force-refresh).
 
