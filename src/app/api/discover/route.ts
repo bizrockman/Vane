@@ -40,21 +40,28 @@ export const GET = async (req: Request) => {
     if (mode === 'normal') {
       const seenUrls = new Set();
 
-      data = (
-        await Promise.all(
-          selectedTopic.links.flatMap((link) =>
-            selectedTopic.query.map(async (query) => {
-              return (
-                await searchTavilyNews(query, {
-                  include_domains: [link],
-                  max_results: 6,
-                })
-              ).results;
-            }),
-          ),
-        )
-      )
-        .flat()
+      // Promise.allSettled so a single rate-limited (429) or failing call
+      // doesn't take the whole panel down. We render whatever did come back.
+      const settled = await Promise.allSettled(
+        selectedTopic.links.flatMap((link) =>
+          selectedTopic.query.map(async (query) => {
+            return (
+              await searchTavilyNews(query, {
+                include_domains: [link],
+                max_results: 6,
+              })
+            ).results;
+          }),
+        ),
+      );
+      const failures = settled.filter((s) => s.status === 'rejected').length;
+      if (failures > 0) {
+        console.warn(
+          `Discover: ${failures}/${settled.length} sub-queries failed (likely rate limit); rendering partial results.`,
+        );
+      }
+      data = settled
+        .flatMap((s) => (s.status === 'fulfilled' ? s.value : []))
         .filter((item) => {
           const url = item.url?.toLowerCase().trim();
           if (seenUrls.has(url)) return false;
