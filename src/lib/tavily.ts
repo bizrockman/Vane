@@ -64,6 +64,7 @@ interface TavilyApiResult {
   content?: string;
   score?: number;
   raw_content?: string;
+  thumbnail?: string;
 }
 
 interface TavilyApiResponse {
@@ -121,6 +122,7 @@ export const searchTavily = async (
     title: r.title,
     url: r.url,
     content: r.content,
+    thumbnail: r.thumbnail,
   }));
 
   return { results, suggestions: [] };
@@ -130,3 +132,110 @@ export const searchTavily = async (
 // working with a minimal diff. There is no SearXNG anymore — every call lands
 // on the orio-search Tavily endpoint.
 export const searchSearxng = searchTavily;
+
+
+// ---------------------------------------------------------------------------
+// Dedicated wrappers for orio-search's typed media/news endpoints.
+// ---------------------------------------------------------------------------
+
+const orioPost = async <T>(path: string, body: unknown): Promise<T> => {
+  const apiKey = getTavilyAPIKey();
+  if (!apiKey) {
+    throw new Error(
+      'Tavily API key is not configured. Set TAVILY_API_KEY (Bearer key issued by orio-search).',
+    );
+  }
+  const baseURL = getTavilyBaseURL().replace(/\/+$/, '');
+  const res = await fetch(`${baseURL}${path}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    throw new Error(`orio ${path} failed: ${res.status} ${res.statusText} ${text}`.trim());
+  }
+  return (await res.json()) as T;
+};
+
+/**
+ * News search via orio-search /search/news. Forces topic=news server-side and
+ * surfaces per-result `thumbnail` when the underlying SearXNG news engine
+ * supplies one.
+ */
+export const searchTavilyNews = async (
+  query: string,
+  opts?: { max_results?: number; include_domains?: string[] },
+): Promise<{ results: SearxngSearchResult[] }> => {
+  const body: Record<string, unknown> = {
+    query,
+    max_results: opts?.max_results ?? 10,
+    search_depth: 'basic',
+  };
+  if (opts?.include_domains?.length) body.include_domains = opts.include_domains;
+  const response = await orioPost<TavilyApiResponse>('/search/news', body);
+  const results: SearxngSearchResult[] = (response.results || []).map((r) => ({
+    title: r.title,
+    url: r.url,
+    content: r.content,
+    thumbnail: r.thumbnail,
+  }));
+  return { results };
+};
+
+interface OrioImageHit {
+  title: string;
+  url: string;
+  img_src: string;
+  thumbnail_src?: string;
+  source?: string;
+}
+
+interface OrioImageResponse {
+  query: string;
+  results: OrioImageHit[];
+  response_time: number;
+}
+
+/** Image search via orio-search /search/images. Returns rich per-result fields. */
+export const searchTavilyImages = async (
+  query: string,
+  opts?: { max_results?: number },
+): Promise<{ results: OrioImageHit[] }> => {
+  const response = await orioPost<OrioImageResponse>('/search/images', {
+    query,
+    max_results: opts?.max_results ?? 10,
+  });
+  return { results: response.results || [] };
+};
+
+interface OrioVideoHit {
+  title: string;
+  url: string;
+  iframe_src?: string;
+  img_src?: string;
+  duration?: string;
+  author?: string;
+  source?: string;
+}
+
+interface OrioVideoResponse {
+  query: string;
+  results: OrioVideoHit[];
+  response_time: number;
+}
+
+/** Video search via orio-search /search/videos. */
+export const searchTavilyVideos = async (
+  query: string,
+  opts?: { max_results?: number },
+): Promise<{ results: OrioVideoHit[] }> => {
+  const response = await orioPost<OrioVideoResponse>('/search/videos', {
+    query,
+    max_results: opts?.max_results ?? 10,
+  });
+  return { results: response.results || [] };
+};

@@ -1,6 +1,6 @@
 /* I don't think can be classified as agents but to keep the structure consistent i guess ill keep it here */
 
-import { searchSearxng } from '@/lib/tavily';
+import { searchTavilyImages } from '@/lib/tavily';
 import {
   imageSearchFewShots,
   imageSearchPrompt,
@@ -44,9 +44,7 @@ const searchImages = async (
     schema: schema,
   });
 
-  const searchRes = await searchSearxng(res.query, {
-    engines: ['bing images', 'google images'],
-  });
+  const searchRes = await searchTavilyImages(res.query, { max_results: 10 });
 
   const images: ImageSearchResult[] = [];
 

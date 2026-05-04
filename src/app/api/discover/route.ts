@@ -1,4 +1,4 @@
-import { searchSearxng } from '@/lib/tavily';
+import { searchTavilyNews } from '@/lib/tavily';
 
 const websitesForTopic = {
   tech: {
@@ -45,10 +45,9 @@ export const GET = async (req: Request) => {
           selectedTopic.links.flatMap((link) =>
             selectedTopic.query.map(async (query) => {
               return (
-                await searchSearxng(`site:${link} ${query}`, {
-                  engines: ['bing news'],
-                  pageno: 1,
-                  language: 'en',
+                await searchTavilyNews(query, {
+                  include_domains: [link],
+                  max_results: 6,
                 })
               ).results;
             }),
@@ -64,15 +63,17 @@ export const GET = async (req: Request) => {
         })
         .sort(() => Math.random() - 0.5);
     } else {
+      const link = selectedTopic.links[
+        Math.floor(Math.random() * selectedTopic.links.length)
+      ];
+      const query = selectedTopic.query[
+        Math.floor(Math.random() * selectedTopic.query.length)
+      ];
       data = (
-        await searchSearxng(
-          `site:${selectedTopic.links[Math.floor(Math.random() * selectedTopic.links.length)]} ${selectedTopic.query[Math.floor(Math.random() * selectedTopic.query.length)]}`,
-          {
-            engines: ['bing news'],
-            pageno: 1,
-            language: 'en',
-          },
-        )
+        await searchTavilyNews(query, {
+          include_domains: [link],
+          max_results: 5,
+        })
       ).results;
     }
 
