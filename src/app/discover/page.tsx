@@ -58,9 +58,12 @@ const Page = () => {
         throw new Error(data.message);
       }
 
-      // Upstream filtered out items without a thumbnail; in this fork search
-      // is served by orio-search which doesn't ship per-result thumbnails, so
-      // the cards now handle missing images themselves and we keep all blogs.
+      // Discover layout shuffles results randomly on each fetch and renders
+      // only the first ~10. Without this filter the rare thumbnail-less hit
+      // would land in the visible window every few clicks and the panel would
+      // flicker (cards with vs without images). orio-search supplies a
+      // thumbnail for ~95% of news results; keeping just those is fine.
+      data.blogs = data.blogs.filter((blog: Discover) => blog.thumbnail);
       setDiscover(data.blogs);
     } catch (err: any) {
       console.error('Error fetching data:', err.message);
