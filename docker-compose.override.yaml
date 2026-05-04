@@ -1,0 +1,11 @@
+services:
+  vane:
+    # Build from this checkout instead of pulling
+    # itzcrazykns1337/vane:latest from the registry.
+    image: vane:orio-local
+    build:
+      context: .
+    environment:
+      - TAVILY_API_KEY=${TAVILY_API_KEY}
+      - TAVILY_BASE_URL=${TAVILY_BASE_URL:-https://llm-websearch.apps.alsdienst.de}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}

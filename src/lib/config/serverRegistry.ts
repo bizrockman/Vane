@@ -11,5 +11,9 @@ export const getConfiguredModelProviderById = (
   return getConfiguredModelProviders().find((p) => p.id === id) ?? undefined;
 };
 
-export const getSearxngURL = () =>
-  configManager.getConfig('search.searxngURL', '');
+export const getTavilyAPIKey = (): string =>
+  configManager.getConfig('search.tavilyAPIKey', '');
+
+export const getTavilyBaseURL = (): string =>
+  configManager.getConfig('search.tavilyBaseURL', '') ||
+  'https://api.tavily.com';

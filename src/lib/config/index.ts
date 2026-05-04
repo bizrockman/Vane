@@ -17,7 +17,8 @@ class ConfigManager {
     personalization: {},
     modelProviders: [],
     search: {
-      searxngURL: '',
+      tavilyAPIKey: '',
+      tavilyBaseURL: '',
     },
   };
   uiConfigSections: UIConfigSections = {
@@ -103,15 +104,28 @@ class ConfigManager {
     modelProviders: [],
     search: [
       {
-        name: 'SearXNG URL',
-        key: 'searxngURL',
+        name: 'Tavily Base URL',
+        key: 'tavilyBaseURL',
         type: 'string',
         required: false,
-        description: 'The URL of your SearXNG instance',
-        placeholder: 'http://localhost:4000',
+        description:
+          'Base URL of the Tavily-compatible search API (orio-search instance).',
+        placeholder: 'https://llm-websearch.apps.alsdienst.de',
         default: '',
         scope: 'server',
-        env: 'SEARXNG_API_URL',
+        env: 'TAVILY_BASE_URL',
+      },
+      {
+        name: 'Tavily API Key',
+        key: 'tavilyAPIKey',
+        type: 'string',
+        required: false,
+        description:
+          'Bearer key issued by orio-search (one of the values from ORIO_AUTH_API_KEYS).',
+        placeholder: '',
+        default: '',
+        scope: 'server',
+        env: 'TAVILY_API_KEY',
       },
     ],
   };

@@ -1,6 +1,6 @@
 /* I don't think can be classified as agents but to keep the structure consistent i guess ill keep it here */
 
-import { searchSearxng } from '@/lib/searxng';
+import { searchSearxng } from '@/lib/tavily';
 import {
   imageSearchFewShots,
   imageSearchPrompt,
